@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>체육 행사 안전정보 포털</title>
+    <!-- Use Pretendard font for premium look -->
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <a href="#">체육 행사 안전정보시스템</a>
+            </div>
+            <nav class="gnb">
+                <ul>
+                    <li class="active"><a href="#">체육행사 안전정보 포털이란</a></li>
+                    <li><a href="#">체육행사 안내</a></li>
+                    <li><a href="#">전국 체육 행사 통계</a></li>
+                </ul>
+            </nav>
+            <div class="user-utils">
+                <span class="user-name">이주희 한국스포츠안전재단</span>
+                <span class="badge">통합관리자</span>
+                <div class="icon bell">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="count">3</span>
+                </div>
+                <div class="icon user">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <video class="hero-bg-video" src="assets/images/hero.mp4" autoplay loop muted playsinline
+            aria-hidden="true"></video>
+    </section>
+
+    <!-- Intro Section -->
+    <section class="intro reveal">
+        <div class="container">
+            <h2>체육 행사 안전정보 포털</h2>
+            <p>국민체육진흥법 시행령에 의해 체육 행사의 안전관리 계획/조치가 점검 완료된 전국의 모든 체육 행사를 안내드립니다.</p>
+        </div>
+    </section>
+
+    <!-- Section 1 -->
+    <section class="content-section bg-white reveal">
+        <div class="grid-container">
+            <div class="grid-image">
+                <img src="assets/images/content_img_01.jpg" alt="자전거">
+            </div>
+            <div class="grid-text text-left">
+                <span class="section-num">1.</span>
+                <h3>전국 체육 행사의 안전을<br>점검하고 책임집니다</h3>
+                <p>안전한 체육 행사 정보를 제공합니다.<br>국민의 건강하고 안전한 체육 활동을 지원합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="content-section bg-gray reveal">
+        <div class="grid-container reverse">
+            <div class="grid-image">
+                <img src="assets/images/content_img_02.jpg" alt="러닝">
+            </div>
+            <div class="grid-text text-right">
+                <span class="section-num">2.</span>
+                <h3>체육 행사 안전사고 관리의 중요성</h3>
+                <p>1천명 이상의 규모 행사는 최근 다중인파 통제 및 안전사고 예방의 중요성이<br>
+                    크게 부각되고 있습니다. 이에 따라 주최 및 주관자는 개최 전·중·후에 걸쳐<br>
+                    종합적인 안전 관리체계를 갖추고 국민체육진흥법 시행령을 반드시 준수해야 합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="content-section bg-white reveal">
+        <div class="grid-container">
+            <div class="grid-image">
+                <img src="assets/images/content_img_03.jpg" alt="수영">
+            </div>
+            <div class="grid-text text-left">
+                <span class="section-num">3.</span>
+                <h3>최근 3년간 사고현황</h3>
+                <p>2020~2024년도 스포츠안전재단 '주최자배상책임공제' 계약 중<br>
+                    증권번호 관리 대상인 2022~2024년도 기간 내 발생한 사고 현황입니다.</p>
+
+                <div class="chart-container">
+                    <div class="total-accidents">
+                        <span class="number count-up" data-target="10928">0</span>
+                    </div>
+                    <canvas id="accidentChart"></canvas>
+                </div>
+                <p class="chart-note">※ 1천명 미만 민간/학교 체육행사 등 미포함. (2022~2024 발생 건 기준)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="content-section bg-gray reveal">
+        <div class="grid-container reverse">
+            <div class="grid-image">
+                <img src="assets/images/content_img_04.jpg" alt="역동적인 움직임">
+            </div>
+            <div class="grid-text text-right">
+                <span class="section-num">4.</span>
+                <h3>체육 행사 안전 관리 조치 내역</h3>
+                <ul class="check-list">
+                    <li>체육 행사 개최 장소 및 시설</li>
+                    <li>안전관리책임자(안전관리 업무를 총괄) 및 안전관리자(안전요원 지휘·감독)의 성명 및 역할</li>
+                    <li>안전요원 및 의료요원의 확보 및 배치 방안</li>
+                    <li>안전교육 및 안전점검의 실시 방안</li>
+                    <li>관계 기관과의 협조 필요 사항 및 협조 방안</li>
+                    <li>화재 등 안전사고 발생 방지 방안</li>
+                    <li>안전사고 발생 시의 조치 방안 및 연락 체계</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="content-section bg-white reveal">
+        <div class="grid-container">
+            <div class="grid-image manual-container">
+                <img src="assets/images/content_img_05.jpg" alt="매뉴얼">
+            </div>
+            <div class="grid-text text-left">
+                <span class="section-num">5.</span>
+                <h3>체육 행사 안전관리 종합 매뉴얼</h3>
+                <p>위 매뉴얼은 국민체육진흥법 및 스포츠안전공제 등 주요 법령(재난안전법, 중대재해처벌법 등)을<br>
+                    기반으로 체육 행사 안전관리에 요구되는 핵심 기준을 담아 제작되었습니다.<br>
+                    행사 개최 시 필수적으로 참조해야 할 안전 규제와 제도를 모두 포함합니다.</p>
+                <a href="#" class="btn-download">매뉴얼 다운로드 <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-top">
+                <ul class="policy-links">
+                    <li><a href="#" class="primary">개인정보처리방침</a></li>
+                    <li><a href="#">이용약관</a></li>
+                    <li><a href="#">이메일무단수집거부</a></li>
+                </ul>
+                <div class="footer-utils">
+                    <div class="dropdown">
+                        <button class="dropdown-btn">유관 사이트 <i class="fa-solid fa-chevron-down"></i></button>
+                    </div>
+                    <button class="top-btn" id="goTop"><i class="fa-solid fa-arrow-up"></i></button>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>05540 서울특별시 송파구 올림픽로 424 올림픽공원테니스경기장 3층 스포츠안전재단</p>
+                <div class="contact-info">
+                    <span>안전점검 사업 문의 : 02 2023 5563, jeongyR@sports.or.kr</span>
+                    <span>안전요원 사업 문의 : 02 2023 5554, ehehgks7@sports.or.kr</span>
+                </div>
+                <p class="hours">업무시간 09:00 ~ 18:00 (토·일·공휴 휴무)</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
