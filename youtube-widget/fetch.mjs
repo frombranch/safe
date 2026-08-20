@@ -17,7 +17,8 @@ const API = 'https://www.googleapis.com/youtube/v3';
 const HANGUL = /[가-힣]/;
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
-if (!API_KEY) {
+// --from-cache 는 저장해 둔 후보만 다시 추리므로 키가 필요 없다
+if (!API_KEY && !process.argv.includes('--from-cache')) {
   console.error('YOUTUBE_API_KEY 환경변수가 없습니다.  예) YOUTUBE_API_KEY=AIza... node fetch.mjs');
   process.exit(1);
 }
@@ -143,16 +144,36 @@ function toRecord(v) {
   };
 }
 
-async function collectCategory(cat, publishedAfter) {
+/* ---------- 후보 수집 (API) ---------- */
+
+async function gather(cat, publishedAfter) {
   const ids = new Set();
   for (const q of cat.queries) {
     for (const id of await searchIds(q, publishedAfter)) ids.add(id);
   }
+  return hydrate([...ids]);
+}
 
-  const videos = (await hydrate([...ids]))
+/* ---------- 선별 (API 없이 재실행 가능) ---------- */
+
+/**
+ * 검색 결과는 주제에서 곧잘 벗어난다("AI 디자인 툴"에 게임 영상이 섞이는 식).
+ * config 의 mustMatch 키워드가 제목에 하나도 없으면 후보에서 뺀다.
+ */
+function onTopic(cat, v) {
+  if (!cat.mustMatch?.length) return true;
+  const title = v.snippet.title.toLowerCase();
+  return cat.mustMatch.some((k) => title.includes(k.toLowerCase()));
+}
+
+function rank(cat, raw, taken) {
+  const videos = raw
     .filter((v) => !config.koreanOnly || isKorean(v))
+    .filter((v) => onTopic(cat, v))
     .map(toRecord)
-    .filter((v) => v.views >= config.minViews && v.duration > 0)
+    // 쇼츠는 하루 평균 조회수가 압도적이라 목록을 독식한다. 공부용이 아니므로 제외.
+    .filter((v) => v.duration >= config.minDuration && v.views >= config.minViews)
+    .filter((v) => !taken.has(v.id))
     .sort((a, b) => b.score - a.score);
 
   // 한 채널이 목록을 독점하지 않도록 채널당 상한을 둔다
@@ -163,25 +184,46 @@ async function collectCategory(cat, publishedAfter) {
     if (n >= config.maxPerChannelPerCategory) continue;
     perChannel.set(v.channelId, n + 1);
     picked.push(v);
+    taken.add(v.id);
     if (picked.length >= perCategoryLimit) break;
   }
 
   const top = picked[0]?.score ?? 1;
   for (const v of picked) v.heat = Math.max(0.08, Math.min(1, v.score / top));
 
-  console.log(`  ${cat.label.padEnd(18)} 후보 ${ids.size}개 → 채택 ${picked.length}개`);
+  console.log(`  ${cat.label.padEnd(18)} 후보 ${raw.length}개 → 채택 ${picked.length}개`);
   return { id: cat.id, label: cat.label, blurb: cat.blurb, videos: picked };
 }
 
-/* ---------- 실행 ---------- */
 
-const publishedAfter = new Date(Date.now() - windowDays * 86400000).toISOString();
-console.log(`최근 ${windowDays}일 이내 한국어 영상을 수집합니다…`);
+const cachePath = resolve(HERE, '.cache.json');
+const fromCache = process.argv.includes('--from-cache');
 
-const categories = [];
-for (const cat of config.categories) {
-  categories.push(await collectCategory(cat, publishedAfter));
+let raw;
+if (fromCache) {
+  try {
+    const cached = JSON.parse(readFileSync(cachePath, 'utf8'));
+    raw = cached.raw;
+    console.log(`캐시된 후보로 다시 선별합니다 (${cached.fetchedAt} 수집).`);
+  } catch {
+    console.error('.cache.json 이 없습니다. --from-cache 없이 한 번 실행해 후보를 받아 두세요.');
+    process.exit(1);
+  }
+} else {
+  const publishedAfter = new Date(Date.now() - windowDays * 86400000).toISOString();
+  console.log(`최근 ${windowDays}일 이내 한국어 영상을 수집합니다…`);
+  raw = {};
+  for (const cat of config.categories) {
+    raw[cat.id] = await gather(cat, publishedAfter);
+  }
+  // 원본 후보를 남겨 두면 필터를 손볼 때 할당량을 다시 쓰지 않아도 된다
+  writeFileSync(cachePath, JSON.stringify({ fetchedAt: new Date().toISOString(), windowDays, raw }));
 }
+
+// 같은 영상이 여러 주제에 겹쳐 나오면 점수가 가장 높은 주제 한 곳에만 남긴다
+const taken = new Set();
+const categories = config.categories.map((cat) => rank(cat, raw[cat.id] ?? [], taken));
+
 
 /**
  * --thumbs 를 주면 썸네일을 내려받아 data: URI 로 심는다.
