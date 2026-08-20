@@ -1,0 +1,63 @@
+{
+  "regionCode": "KR",
+  "relevanceLanguage": "ko",
+  "windowDays": 120,
+  "minViews": 300,
+  "maxPerChannelPerCategory": 2,
+  "perCategoryLimit": 14,
+  "koreanOnly": true,
+  "categories": [
+    {
+      "id": "claude-code",
+      "label": "Claude Code 디자인",
+      "blurb": "클로드 코드로 화면 만들고 프로토타이핑하기",
+      "queries": [
+        "클로드코드",
+        "클로드 코드 사용법",
+        "클로드코드 디자인",
+        "바이브코딩",
+        "Claude Code 강의",
+        "클로드 코드 UI 만들기"
+      ]
+    },
+    {
+      "id": "figma-ai",
+      "label": "Figma × AI",
+      "blurb": "피그마 자동화, MCP, 디자인 시스템 연결",
+      "queries": [
+        "피그마 AI",
+        "Figma MCP",
+        "피그마 AI 플러그인",
+        "피그마 자동화",
+        "Figma Make",
+        "디자인 시스템 AI"
+      ]
+    },
+    {
+      "id": "ai-docs",
+      "label": "AI 문서·리포트",
+      "blurb": "제안서·기획서·리뷰 문서를 AI로 쓰기",
+      "queries": [
+        "AI 기획서 작성",
+        "AI 제안서 작성",
+        "AI PPT 만들기",
+        "챗GPT 문서 작성",
+        "노션 AI 활용법",
+        "AI 보고서 자동화"
+      ]
+    },
+    {
+      "id": "ux-ai",
+      "label": "UX/UI × 생성형 AI",
+      "blurb": "포토샵·제미나이·이미지 생성 등 디자이너용 AI",
+      "queries": [
+        "UXUI 디자이너 AI",
+        "AI 디자인 툴",
+        "포토샵 AI 활용",
+        "제미나이 이미지 생성",
+        "나노바나나 AI",
+        "AI 웹디자인"
+      ]
+    }
+  ]
+}

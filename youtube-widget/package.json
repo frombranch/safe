@@ -1,0 +1,13 @@
+{
+  "name": "evening-study-queue",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI·디자인 학습용 한국어 유튜브 영상을 매일 큐레이션하는 개인 위젯",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "fetch": "node fetch.mjs",
+    "build": "node build.mjs",
+    "refresh": "node fetch.mjs && node build.mjs"
+  }
+}
