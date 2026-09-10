@@ -5,7 +5,7 @@
  *   YOUTUBE_API_KEY=... node fetch.mjs [--days 120] [--limit 14] [--out data.json]
  *
  * 검색(search.list) 1회 = 쿼터 100유닛, 상세조회(videos.list) 1회 = 1유닛.
- * 기본 설정(카테고리 4 × 쿼리 6)이면 하루 약 2,430유닛 — 무료 한도 10,000유닛 안쪽이다.
+ * 기본 설정(카테고리 5 × 쿼리 6)이면 하루 약 3,030유닛 — 무료 한도 10,000유닛 안쪽이다.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -161,40 +161,62 @@ async function gather(cat, publishedAfter) {
  * config 의 mustMatch 키워드가 제목에 하나도 없으면 후보에서 뺀다.
  */
 function onTopic(cat, v) {
-  if (!cat.mustMatch?.length) return true;
   const title = v.snippet.title.toLowerCase();
-  return cat.mustMatch.some((k) => title.includes(k.toLowerCase()));
+  const has = (list) => list.some((k) => title.includes(k.toLowerCase()));
+
+  // excludeMatch 는 mustMatch 를 이긴다. 넓은 키워드(예: MCP)가 주제와 무관한
+  // 콘텐츠(영상 제작·쇼츠)를 끌고 오는 것을 막는 용도다.
+  if (cat.excludeMatch?.length && has(cat.excludeMatch)) return false;
+  if (!cat.mustMatch?.length) return true;
+  return has(cat.mustMatch);
 }
 
-function rank(cat, raw, taken) {
-  const videos = raw
+function candidates(cat, raw) {
+  return raw
     .filter((v) => !config.koreanOnly || isKorean(v))
     .filter((v) => onTopic(cat, v))
     .map(toRecord)
     // 쇼츠는 하루 평균 조회수가 압도적이라 목록을 독식한다. 공부용이 아니므로 제외.
     .filter((v) => v.duration >= config.minDuration && v.views >= config.minViews)
-    .filter((v) => !taken.has(v.id))
     .sort((a, b) => b.score - a.score);
+}
 
+/**
+ * 같은 영상이 여러 주제의 검색에 함께 걸리는 일은 흔하다.
+ * '먼저 나온 주제가 가져간다'로 처리하면 config 의 나열 순서가 결과를 좌우하므로,
+ * 각 주제 안에서의 순위를 비교해 가장 위에 오는 주제 한 곳에만 남긴다.
+ */
+function assignOwners(pools) {
+  const owner = new Map();
+  for (const [catId, pool] of pools) {
+    pool.forEach((v, rank) => {
+      const held = owner.get(v.id);
+      if (!held || rank < held.rank) owner.set(v.id, { catId, rank });
+    });
+  }
+  return owner;
+}
+
+function pick(cat, pool, owner) {
   // 한 채널이 목록을 독점하지 않도록 채널당 상한을 둔다
   const perChannel = new Map();
   const picked = [];
-  for (const v of videos) {
+
+  for (const v of pool) {
+    if (owner.get(v.id)?.catId !== cat.id) continue;
     const n = perChannel.get(v.channelId) ?? 0;
     if (n >= config.maxPerChannelPerCategory) continue;
     perChannel.set(v.channelId, n + 1);
     picked.push(v);
-    taken.add(v.id);
     if (picked.length >= perCategoryLimit) break;
   }
 
   const top = picked[0]?.score ?? 1;
   for (const v of picked) v.heat = Math.max(0.08, Math.min(1, v.score / top));
 
-  console.log(`  ${cat.label.padEnd(18)} 후보 ${raw.length}개 → 채택 ${picked.length}개`);
+  console.log(`  ${cat.label.padEnd(18)} 주제 통과 ${String(pool.length).padStart(3)}개 → 채택 ${picked.length}개`);
   return { id: cat.id, label: cat.label, blurb: cat.blurb, videos: picked };
 }
-
 
 const cachePath = resolve(HERE, '.cache.json');
 const fromCache = process.argv.includes('--from-cache');
@@ -220,9 +242,9 @@ if (fromCache) {
   writeFileSync(cachePath, JSON.stringify({ fetchedAt: new Date().toISOString(), windowDays, raw }));
 }
 
-// 같은 영상이 여러 주제에 겹쳐 나오면 점수가 가장 높은 주제 한 곳에만 남긴다
-const taken = new Set();
-const categories = config.categories.map((cat) => rank(cat, raw[cat.id] ?? [], taken));
+const pools = new Map(config.categories.map((cat) => [cat.id, candidates(cat, raw[cat.id] ?? [])]));
+const owner = assignOwners(pools);
+const categories = config.categories.map((cat) => pick(cat, pools.get(cat.id), owner));
 
 
 /**

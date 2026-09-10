@@ -121,7 +121,7 @@ function card(v, catId) {
 const total = data.categories.reduce((n, c) => n + c.videos.length, 0);
 
 const tabs = [
-  `      <button type="button" class="tab" role="tab" data-cat="all" aria-selected="true" data-blurb="네 가지 주제를 트렌드 점수 순으로 한 줄에 모았습니다.">전체<span class="count">${total}</span></button>`,
+  `      <button type="button" class="tab" role="tab" data-cat="all" aria-selected="true" data-blurb="${data.categories.length}개 주제를 트렌드 점수 순으로 한 줄에 모았습니다.">전체<span class="count">${total}</span></button>`,
   ...data.categories.map((c) =>
     `      <button type="button" class="tab" role="tab" data-cat="${esc(c.id)}" aria-selected="false" data-blurb="${esc(c.blurb)}">${esc(c.label)}<span class="count">${c.videos.length}</span></button>`),
 ].join('\n');
