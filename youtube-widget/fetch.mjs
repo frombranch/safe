@@ -17,8 +17,11 @@ const API = 'https://www.googleapis.com/youtube/v3';
 const HANGUL = /[가-힣]/;
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
+// YT_KEY_VIA_PROXY=1 이면 키를 직접 붙이지 않는다.
+// 클라우드 환경에 저장된 네트워크 시크릿이 X-goog-api-key 헤더로 주입된다.
+const KEY_VIA_PROXY = process.env.YT_KEY_VIA_PROXY === '1';
 // --from-cache 는 저장해 둔 후보만 다시 추리므로 키가 필요 없다
-if (!API_KEY && !process.argv.includes('--from-cache')) {
+if (!API_KEY && !KEY_VIA_PROXY && !process.argv.includes('--from-cache')) {
   console.error('YOUTUBE_API_KEY 환경변수가 없습니다.  예) YOUTUBE_API_KEY=AIza... node fetch.mjs');
   process.exit(1);
 }
@@ -42,7 +45,7 @@ let quotaUsed = 0;
 async function api(path, params, cost) {
   const url = new URL(`${API}/${path}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
-  url.searchParams.set('key', API_KEY);
+  if (!KEY_VIA_PROXY) url.searchParams.set('key', API_KEY);
 
   for (let attempt = 0; attempt < 4; attempt++) {
     const res = await fetch(url);
